@@ -2,6 +2,21 @@ import Menu from './Menu.js';
 
 const Order = {
     cart: [],
+    load: () => {
+        if (!localStorage.getItem('cm-cart')) {
+            return;
+        }
+        try {
+            Order.cart = JSON.parse(localStorage.getItem('cm-cart')) || [];
+            Order.render(); // not performant, but works for now
+            return Order.cart;
+        } catch (error) {
+            console.log("Error loading cart", error);
+        }
+    },
+    save: () => {
+        localStorage.setItem('cm-cart', JSON.stringify(Order.cart));
+    },
     add: async id => {
         const product = await Menu.getProductById(id);
         const results = Order.cart.filter(prodInCart => prodInCart.product.id==id);
@@ -23,6 +38,7 @@ const Order = {
         Order.render();
     },
     render: () => {
+        Order.save();
         if (Order.cart.length==0) {
             document.querySelector("#order").innerHTML = `
                 <p class="empty">Your order is empty</p>
@@ -60,5 +76,6 @@ const Order = {
         }
     }
 }
+Order.load(); // do we need to make this async?
 window.Order = Order; // make it "public"
 export default Order;
